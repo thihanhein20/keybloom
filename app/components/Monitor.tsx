@@ -1,7 +1,7 @@
 import { Html, RoundedBox } from "@react-three/drei";
 
 export function Monitor({typed,active}:{typed:string;active:string}){
-  return <group position={[0,.98,-1.35]} scale={.78}>
+  return <group position={[0,.48,-1.35]} scale={.78}>
     <RoundedBox args={[5.7,3.65,.62]} radius={.42} smoothness={8} castShadow receiveShadow><meshStandardMaterial color="#f29a67" roughness={.36}/></RoundedBox>
     <RoundedBox args={[5.08,3.08,.08]} radius={.28} smoothness={7} position={[0,.02,.35]}><meshStandardMaterial color="#7c4f46" roughness={.5}/></RoundedBox>
     <RoundedBox args={[4.64,2.68,.07]} radius={.22} smoothness={6} position={[0,.02,.41]}><meshStandardMaterial color="#241f2a" roughness={.28} emissive="#171322" emissiveIntensity={.5}/></RoundedBox>

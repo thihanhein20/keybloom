@@ -18,7 +18,7 @@ function Keycap({item,x,z,pressed,onPress}:{item:KeyDefinition;x:number;z:number
 
 export function Keyboard({pressed,onKey}:{pressed:Set<string>;onKey:(code:string,label:string)=>void}){
   const keys=useMemo(()=>KEY_ROWS.map((row,rowIndex)=>{const total=row.reduce((sum,key)=>sum+(key.width||1),0);let cursor=-total*.22;return row.map(key=>{const width=(key.width||1)*.44;const x=cursor+width/2;cursor+=width;return {key,x,z:rowIndex*.44+.08}})}),[]);
-  return <group position={[-.28,-1.35,.85]} rotation={[-.16,0,0]} scale={1.02}>
+  return <group position={[-.28,-1.55,.85]} rotation={[-.16,0,0]} scale={1.02}>
     <RoundedBox args={[7.26,.42,2.56]} radius={.18} smoothness={5} position={[0,-.01,.96]} castShadow receiveShadow><meshStandardMaterial color="#f3c49d" roughness={.5}/></RoundedBox>
     <RoundedBox args={[7.04,.15,2.36]} radius={.11} smoothness={4} position={[0,.25,.96]} receiveShadow><meshStandardMaterial color="#d97958" roughness={.66}/></RoundedBox>
     {[-3.43,3.43].map(x=><RoundedBox key={x} args={[.14,.20,2.22]} radius={.04} smoothness={3} position={[x,.36,.96]} castShadow><meshStandardMaterial color="#ffd8b6" roughness={.5}/></RoundedBox>)}
