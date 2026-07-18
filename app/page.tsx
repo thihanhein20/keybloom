@@ -45,7 +45,7 @@ function Keycap({ item, x, z, pressed, onPress }: { item:KeyDef;x:number;z:numbe
 
 function Keyboard({ pressed, hit }: {pressed:Set<string>;hit:(code:string,label:string)=>void}) {
   const keyData=useMemo(()=>rows.map((row,ri)=>{const total=row.reduce((a,k)=>a+(k.width||1),0);let cursor=-total*.22;return row.map(k=>{const width=(k.width||1)*.44;const x=cursor+width/2;cursor+=width;return {k,x,z:ri*.44+.08};});}),[]);
-  return <group position={[0,-1.5,.85]} rotation={[-.10,0,0]}>
+  return <group position={[0,-1.35,.85]} rotation={[-.16,0,0]} scale={1.06}>
     <RoundedBox args={[7.55,.35,2.75]} radius={.24} smoothness={5} position={[0,.02,.95]} castShadow receiveShadow><meshStandardMaterial color="#df7d54" roughness={.42}/></RoundedBox>
     <RoundedBox args={[7.2,.12,2.42]} radius={.18} smoothness={4} position={[0,.22,.95]} receiveShadow><meshStandardMaterial color="#b85f47" roughness={.62}/></RoundedBox>
     {keyData.flatMap((row,ri)=>row.map(({k,x,z})=><Keycap key={`${ri}-${k.code}`} item={k} x={x} z={z} pressed={pressed.has(k.code)} onPress={()=>hit(k.code,k.label)}/>))}
@@ -55,7 +55,7 @@ function Keyboard({ pressed, hit }: {pressed:Set<string>;hit:(code:string,label:
 }
 
 function Monitor({ typed, active }: {typed:string;active:string}) {
-  return <group position={[0,1.68,-1.18]} scale={.9}>
+  return <group position={[0,1.85,-1.35]} scale={.78}>
     <RoundedBox args={[5.7,3.65,.62]} radius={.42} smoothness={8} castShadow receiveShadow><meshStandardMaterial color="#f29a67" roughness={.36}/></RoundedBox>
     <RoundedBox args={[5.08,3.08,.08]} radius={.28} smoothness={7} position={[0,.02,.35]}><meshStandardMaterial color="#7c4f46" roughness={.5}/></RoundedBox>
     <RoundedBox args={[4.64,2.68,.07]} radius={.22} smoothness={6} position={[0,.02,.41]}><meshStandardMaterial color="#241f2a" roughness={.28} emissive="#171322" emissiveIntensity={.5}/></RoundedBox>
@@ -80,7 +80,7 @@ function DeskScene({ pressed,typed,active,hit }:{pressed:Set<string>;typed:strin
     <Float speed={1.1} rotationIntensity={.025} floatIntensity={.08}><group rotation={[0,.04,0]}><Monitor typed={typed} active={active}/><Keyboard pressed={pressed} hit={hit}/></group></Float>
     <mesh rotation={[-Math.PI/2,0,0]} position={[0,-1.72,0]} receiveShadow><planeGeometry args={[40,40]}/><meshStandardMaterial color="#efb982" roughness={.83}/></mesh>
     <ContactShadows position={[0,-1.69,0]} opacity={.38} scale={14} blur={2.4} far={5}/><Environment preset="apartment"/>
-    <OrbitControls makeDefault enablePan={false} enableRotate={false} enableZoom={false} target={[0,-.05,.25]}/>
+    <OrbitControls makeDefault enablePan={false} enableRotate={false} enableZoom={false} target={[0,-.72,.62]}/>
   </>;
 }
 
@@ -92,5 +92,5 @@ export default function Home(){
     setTimeout(()=>setActive(""),180);
   },[]);
   useEffect(()=>{const down=(e:KeyboardEvent)=>{if(e.repeat)return;e.preventDefault();hit(e.code,e.key===" "?"space":e.key==="Backspace"?"⌫":e.key.length===1?e.key:e.key)};const up=(e:KeyboardEvent)=>setPressed(p=>{const n=new Set(p);n.delete(e.code);return n});addEventListener("keydown",down);addEventListener("keyup",up);return()=>{removeEventListener("keydown",down);removeEventListener("keyup",up)}},[hit]);
-  return <main><header><a href="#" className="brand"><span>⌁</span> keybloom</a><p>a tiny place for big thoughts</p><div className="status"><i/> ready to type</div></header><div className="canvas"><Canvas shadows dpr={[1,1.75]} camera={{position:[0,3.9,10.2],fov:37}}><Suspense fallback={null}><DeskScene pressed={pressed} typed={typed} active={active} hit={hit}/></Suspense></Canvas></div><div className="intro"><p>INTERACTIVE DESK FRIEND / 001</p><h1>Make a little<br/><em>click-clack.</em></h1><span>Use your real keyboard—or tap a keycap.<br/>Every little key is waiting for you.</span></div><aside><b>{active||"—"}</b><span>last key</span></aside><div className="hint"><i>⌨</i><span>Start typing<br/><b>every key is alive</b></span></div></main>
+  return <main><header><a href="#" className="brand"><span>⌁</span> keybloom</a><p>a tiny place for big thoughts</p><div className="status"><i/> ready to type</div></header><div className="canvas"><Canvas shadows dpr={[1,1.75]} camera={{position:[0,5.55,10.1],fov:38}}><Suspense fallback={null}><DeskScene pressed={pressed} typed={typed} active={active} hit={hit}/></Suspense></Canvas></div><div className="intro"><p>INTERACTIVE TYPING DESK / 001</p><h1>Make a little<br/><em>click-clack.</em></h1><span>Keep your eyes on the keys.<br/>The screen follows every keystroke.</span></div><aside><b>{active||"—"}</b><span>last key</span></aside><div className="hint"><i>⌨</i><span>Start typing<br/><b>every key is alive</b></span></div></main>
 }
