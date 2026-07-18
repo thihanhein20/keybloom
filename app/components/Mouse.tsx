@@ -3,11 +3,12 @@ import { RoundedBox } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import { playMouseClick } from "./sound";
 
 export function Mouse({darkMode}:{darkMode:boolean}){
   const ref=useRef<THREE.Group>(null!);const left=useRef<THREE.Group>(null!);const right=useRef<THREE.Group>(null!); const [button,setButton]=useState<"left"|"right"|null>(null);
   useFrame((state,delta)=>{ref.current.position.x=THREE.MathUtils.damp(ref.current.position.x,4.55+state.pointer.x*.06,8,delta);ref.current.position.z=THREE.MathUtils.damp(ref.current.position.z,1.36-state.pointer.y*.05,8,delta);ref.current.rotation.y=THREE.MathUtils.damp(ref.current.rotation.y,.30+state.pointer.x*-.02,8,delta);left.current.position.y=THREE.MathUtils.damp(left.current.position.y,button==="left"?-.075:0,24,delta);right.current.position.y=THREE.MathUtils.damp(right.current.position.y,button==="right"?-.075:0,24,delta);left.current.rotation.x=THREE.MathUtils.damp(left.current.rotation.x,button==="left"?.045:0,22,delta);right.current.rotation.x=THREE.MathUtils.damp(right.current.rotation.x,button==="right"?.045:0,22,delta)});
-  useEffect(()=>{const down=(event:PointerEvent)=>setButton(event.button===2?"right":"left");const up=()=>setButton(null);addEventListener("pointerdown",down);addEventListener("pointerup",up);addEventListener("pointercancel",up);return()=>{removeEventListener("pointerdown",down);removeEventListener("pointerup",up);removeEventListener("pointercancel",up)}},[]);
+  useEffect(()=>{const down=(event:PointerEvent)=>{const side=event.button===2?"right":"left";setButton(side);playMouseClick(side)};const up=()=>setButton(null);addEventListener("pointerdown",down);addEventListener("pointerup",up);addEventListener("pointercancel",up);return()=>{removeEventListener("pointerdown",down);removeEventListener("pointerup",up);removeEventListener("pointercancel",up)}},[]);
   const release=()=>setButton(null);
   return <group ref={ref} position={[4.55,-1.57,1.36]} rotation={[-.14,.30,.025]} scale={.66} onPointerUp={release} onPointerLeave={release}>
     <RoundedBox args={[1.45,.18,1.6]} radius={.13} smoothness={5} position={[0,-.08,0]} castShadow receiveShadow><meshStandardMaterial color={darkMode?"#604f65":"#a95f4c"} roughness={.66}/></RoundedBox>

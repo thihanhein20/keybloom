@@ -1,7 +1,7 @@
 let sharedContext:AudioContext|null=null;
+function getAudioContext(){const AudioContextClass=window.AudioContext||(window as unknown as {webkitAudioContext:typeof AudioContext}).webkitAudioContext;sharedContext??=new AudioContextClass();if(sharedContext.state==="suspended")void sharedContext.resume();return sharedContext}
 export function playKeySound() {
-  const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-  sharedContext??=new AudioContextClass(); const context=sharedContext;if(context.state==="suspended")void context.resume();
+  const context=getAudioContext();
   const now = context.currentTime;
   const oscillator = context.createOscillator();
   const gain = context.createGain();
@@ -14,4 +14,8 @@ export function playKeySound() {
   gain.gain.setValueAtTime(.11,now); gain.gain.exponentialRampToValueAtTime(.001,now+.055);
   noise.connect(filter).connect(gain); oscillator.connect(gain).connect(context.destination);
   noise.start(now); oscillator.start(now); oscillator.stop(now+.06);
+}
+
+export function playMouseClick(side:"left"|"right"="left"){
+  const context=getAudioContext();const now=context.currentTime;const oscillator=context.createOscillator();const gain=context.createGain();const filter=context.createBiquadFilter();oscillator.type="triangle";oscillator.frequency.setValueAtTime(side==="left"?185:165,now);oscillator.frequency.exponentialRampToValueAtTime(side==="left"?105:92,now+.045);filter.type="lowpass";filter.frequency.value=720;gain.gain.setValueAtTime(.055,now);gain.gain.exponentialRampToValueAtTime(.001,now+.055);oscillator.connect(filter).connect(gain).connect(context.destination);oscillator.start(now);oscillator.stop(now+.06)
 }
