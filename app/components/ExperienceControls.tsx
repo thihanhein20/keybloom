@@ -1,0 +1,3 @@
+export function ExperienceControls({darkMode,rgbColor,musicPlaying,trackName,onTheme,onRgb,onMusic}:{darkMode:boolean;rgbColor:string;musicPlaying:boolean;trackName:string;onTheme:()=>void;onRgb:(color:string)=>void;onMusic:()=>void}){
+  return <div className="experience-controls"><button type="button" onClick={onTheme}><i>{darkMode?"☾":"☀"}</i><span>{darkMode?"night mode":"day mode"}</span></button><label><i style={{background:rgbColor}}/><span>key glow</span><input type="color" value={rgbColor} onChange={event=>onRgb(event.target.value)} aria-label="Keyboard glow color"/></label><button type="button" onClick={onMusic}><i>{musicPlaying?"Ⅱ":"▶"}</i><span>{trackName}</span></button></div>
+}

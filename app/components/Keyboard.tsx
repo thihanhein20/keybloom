@@ -11,17 +11,22 @@ function Keycap({
   z,
   pressed,
   onPress,
+  darkMode,
+  rgbColor,
 }: {
   item: KeyDefinition;
   x: number;
   z: number;
   pressed: boolean;
   onPress: () => void;
+  darkMode: boolean;
+  rgbColor: string;
 }) {
   const ref = useRef<THREE.Group>(null!);
   const width = (item.width || 1) * 0.44 - 0.045;
   const skirt =
     item.color === "#8fc9bc" ? "#639d91" : item.color ? "#c96f58" : "#c79576";
+  const glow=new THREE.Color(rgbColor).offsetHSL((x+z)*.018,0,0);
   useFrame((_, delta) => {
     ref.current.position.y = THREE.MathUtils.damp(
       ref.current.position.y,
@@ -47,7 +52,7 @@ function Keycap({
         castShadow
         receiveShadow
       >
-        <meshStandardMaterial color={skirt} roughness={0.58} />
+        <meshStandardMaterial color={darkMode?"#17131d":skirt} emissive={darkMode?glow:"#000000"} emissiveIntensity={darkMode?.55:0} roughness={0.58} />
       </RoundedBox>
       <RoundedBox
         args={[width, 0.3, 0.39]}
@@ -59,6 +64,8 @@ function Keycap({
       >
         <meshStandardMaterial
           color={item.color || "#ffe2c5"}
+          emissive={darkMode?glow:"#000000"}
+          emissiveIntensity={darkMode?pressed?1.8:.72:0}
           roughness={0.48}
         />
       </RoundedBox>
@@ -66,7 +73,7 @@ function Keycap({
         position={[0, 0.225, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
         fontSize={item.label.length > 3 ? 0.072 : 0.1}
-        color="#744e42"
+        color={darkMode?"#fff4e8":"#744e42"}
         anchorX="center"
         anchorY="middle"
       >
@@ -79,9 +86,13 @@ function Keycap({
 export function Keyboard({
   pressed,
   onKey,
+  darkMode,
+  rgbColor,
 }: {
   pressed: Set<string>;
   onKey: (code: string, label: string) => void;
+  darkMode: boolean;
+  rgbColor: string;
 }) {
   const keys = useMemo(
     () =>
@@ -107,7 +118,7 @@ export function Keyboard({
         castShadow
         receiveShadow
       >
-        <meshStandardMaterial color="#f3c49d" roughness={0.5} />
+        <meshStandardMaterial color={darkMode?"#24202d":"#f3c49d"} roughness={0.5} />
       </RoundedBox>
       <RoundedBox
         args={[7.04, 0.15, 2.36]}
@@ -116,7 +127,7 @@ export function Keyboard({
         position={[0, 0.25, 0.96]}
         receiveShadow
       >
-        <meshStandardMaterial color="#d97958" roughness={0.66} />
+        <meshStandardMaterial color={darkMode?"#302839":"#d97958"} roughness={0.66} />
       </RoundedBox>
       {[-3.43, 3.43].map((x) => (
         <RoundedBox
@@ -127,7 +138,7 @@ export function Keyboard({
           position={[x, 0.36, 0.96]}
           castShadow
         >
-          <meshStandardMaterial color="#ffd8b6" roughness={0.5} />
+          <meshStandardMaterial color={darkMode?rgbColor:"#ffd8b6"} emissive={darkMode?rgbColor:"#000000"} emissiveIntensity={darkMode?.35:0} roughness={0.5} />
         </RoundedBox>
       ))}
       {[-0.15, 2.07].map((z) => (
@@ -139,7 +150,7 @@ export function Keyboard({
           position={[0, 0.36, z]}
           castShadow
         >
-          <meshStandardMaterial color="#ffd8b6" roughness={0.5} />
+          <meshStandardMaterial color={darkMode?rgbColor:"#ffd8b6"} emissive={darkMode?rgbColor:"#000000"} emissiveIntensity={darkMode?.35:0} roughness={0.5} />
         </RoundedBox>
       ))}
       {keys.flatMap((row, rowIndex) =>
@@ -151,6 +162,8 @@ export function Keyboard({
             z={z}
             pressed={pressed.has(key.code)}
             onPress={() => onKey(key.code, key.label)}
+            darkMode={darkMode}
+            rgbColor={rgbColor}
           />
         )),
       )}

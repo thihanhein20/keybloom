@@ -5,20 +5,25 @@ import { DeskScene } from "./components/DeskScene";
 import { Overlay } from "./components/Overlay";
 import { useTypingDesk } from "./components/useTypingDesk";
 import { CustomCursor } from "./components/CustomCursor";
+import { ExperienceControls } from "./components/ExperienceControls";
+import { useAmbientPlayer } from "./components/useAmbientPlayer";
+import { useState } from "react";
 
 export default function Home() {
   const desk = useTypingDesk();
+  const music=useAmbientPlayer(); const [darkMode,setDarkMode]=useState(false); const [rgbColor,setRgbColor]=useState("#ff7aa8");
   return (
-    <main>
+    <main className={darkMode?"dark-mode":""}>
       <CustomCursor />
       <div className="canvas">
         <Canvas
           shadows
-          dpr={[1, 1.75]}
+          dpr={[1, 1.4]}
+          gl={{antialias:true,powerPreference:"high-performance"}}
           camera={{ position: [0, 8, 10.1], fov: 43 }}
         >
           <Suspense fallback={null}>
-            <DeskScene {...desk} />
+            <DeskScene {...desk} darkMode={darkMode} rgbColor={rgbColor} musicPlaying={music.playing} onMusic={music.toggle} onNextTrack={music.next}/>
           </Suspense>
         </Canvas>
       </div>
@@ -28,6 +33,7 @@ export default function Home() {
         wpm={desk.wpm}
         accuracy={desk.accuracy}
       />
+      <ExperienceControls darkMode={darkMode} rgbColor={rgbColor} musicPlaying={music.playing} trackName={music.trackName} onTheme={()=>setDarkMode(value=>!value)} onRgb={setRgbColor} onMusic={music.toggle}/>
     </main>
   );
 }

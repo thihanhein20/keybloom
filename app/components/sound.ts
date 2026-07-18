@@ -1,6 +1,7 @@
+let sharedContext:AudioContext|null=null;
 export function playKeySound() {
   const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-  const context = new AudioContextClass();
+  sharedContext??=new AudioContextClass(); const context=sharedContext;if(context.state==="suspended")void context.resume();
   const now = context.currentTime;
   const oscillator = context.createOscillator();
   const gain = context.createGain();
@@ -12,5 +13,5 @@ export function playKeySound() {
   oscillator.type="sine"; oscillator.frequency.setValueAtTime(105,now); oscillator.frequency.exponentialRampToValueAtTime(65,now+.045);
   gain.gain.setValueAtTime(.11,now); gain.gain.exponentialRampToValueAtTime(.001,now+.055);
   noise.connect(filter).connect(gain); oscillator.connect(gain).connect(context.destination);
-  noise.start(now); oscillator.start(now); oscillator.stop(now+.06); setTimeout(()=>context.close(),120);
+  noise.start(now); oscillator.start(now); oscillator.stop(now+.06);
 }

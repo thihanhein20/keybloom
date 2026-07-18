@@ -1,4 +1,4 @@
-import { Html, RoundedBox } from "@react-three/drei";
+import { Html, RoundedBox, Text } from "@react-three/drei";
 import type { Difficulty, GamePhase } from "./game-data";
 
 type Props = {
@@ -15,6 +15,9 @@ type Props = {
   onMinutes: (value: number) => void;
   onStart: () => void;
   onReset: () => void;
+  musicPlaying: boolean;
+  onMusic: () => void;
+  onNextTrack: () => void;
 };
 export function Monitor({
   typed,
@@ -30,6 +33,9 @@ export function Monitor({
   onMinutes,
   onStart,
   onReset,
+  musicPlaying,
+  onMusic,
+  onNextTrack,
 }: Props) {
   const clock = `${String(Math.floor(secondsLeft / 60)).padStart(2, "0")}:${String(secondsLeft % 60).padStart(2, "0")}`;
   const windowStart = Math.max(0, typed.length - 34);
@@ -126,11 +132,7 @@ export function Monitor({
                       : absolute === typed.length
                         ? "current"
                         : "";
-                  return (
-                    <span className={state} key={`${absolute}-${index}`}>
-                      {char}
-                    </span>
-                  );
+                  return char==="\n"?<span className="line-break" key={`${absolute}-${index}`}/>:<span className={state} key={`${absolute}-${index}`}>{char}</span>;
                 })}
               </div>
               <div className="game-meta">
@@ -192,18 +194,10 @@ export function Monitor({
       >
         <meshStandardMaterial color="#744e42" roughness={0.5} />
       </RoundedBox>
-      <mesh position={[0.62, -2.49, 0.85]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.075, 0.075, 0.04, 20]} />
-        <meshStandardMaterial
-          color="#8fc9bc"
-          emissive="#70ad9f"
-          emissiveIntensity={0.35}
-        />
-      </mesh>
-      <mesh position={[0.88, -2.49, 0.85]} rotation={[Math.PI / 2, 0, 0]}>
-        <cylinderGeometry args={[0.075, 0.075, 0.04, 20]} />
-        <meshStandardMaterial color="#ef936e" roughness={0.42} />
-      </mesh>
+      <RoundedBox args={[.3,.12,.2]} radius={.05} smoothness={4} position={[.58,-2.43,.82]} onPointerDown={event=>{event.stopPropagation();onMusic()}} castShadow><meshStandardMaterial color={musicPlaying?"#8fc9bc":"#ddb28e"} emissive={musicPlaying?"#70ad9f":"#000000"} emissiveIntensity={musicPlaying?.55:0} roughness={.4}/></RoundedBox>
+      <Text position={[.58,-2.42,.93]} rotation={[-Math.PI/2,0,0]} fontSize={.1} color="#382b32" anchorX="center" anchorY="middle">{musicPlaying?"Ⅱ":"▶"}</Text>
+      <RoundedBox args={[.3,.12,.2]} radius={.05} smoothness={4} position={[.98,-2.43,.82]} onPointerDown={event=>{event.stopPropagation();onNextTrack()}} castShadow><meshStandardMaterial color="#ef936e" roughness={.4}/></RoundedBox>
+      <Text position={[.98,-2.42,.93]} rotation={[-Math.PI/2,0,0]} fontSize={.1} color="#382b32" anchorX="center" anchorY="middle">»</Text>
       <mesh position={[2.45, -1.42, 0.32]}>
         <sphereGeometry args={[0.06, 20, 20]} />
         <meshStandardMaterial
