@@ -12,7 +12,6 @@ function Keycap({
   pressed,
   onPress,
   darkMode,
-  rgbColor,
 }: {
   item: KeyDefinition;
   x: number;
@@ -20,20 +19,20 @@ function Keycap({
   pressed: boolean;
   onPress: () => void;
   darkMode: boolean;
-  rgbColor: string;
 }) {
   const ref = useRef<THREE.Group>(null!);
+  const glowMaterial=useRef<THREE.MeshStandardMaterial>(null!); const legend=useRef<any>(null!);
   const width = (item.width || 1) * 0.44 - 0.045;
   const skirt =
     item.color === "#8fc9bc" ? "#639d91" : item.color ? "#c96f58" : "#c79576";
-  const glow=new THREE.Color(rgbColor).offsetHSL((x+z)*.018,0,0);
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     ref.current.position.y = THREE.MathUtils.damp(
       ref.current.position.y,
       pressed ? 0.32 : 0.47,
       22,
       delta,
     );
+    if(darkMode&&glowMaterial.current){const hue=(state.clock.elapsedTime*.055+x*.065+z*.11+(Math.sin(x*17+z*13)+1)*.04)%1;const color=new THREE.Color().setHSL(hue,.92,.62);glowMaterial.current.color.copy(color);glowMaterial.current.emissive.copy(color);glowMaterial.current.emissiveIntensity=pressed?3.2:1.55;if(legend.current)legend.current.color=color}
   });
   return (
     <group
@@ -52,7 +51,7 @@ function Keycap({
         castShadow
         receiveShadow
       >
-        <meshStandardMaterial color={darkMode?"#17131d":skirt} emissive={darkMode?glow:"#000000"} emissiveIntensity={darkMode?.55:0} roughness={0.58} />
+        <meshStandardMaterial color={darkMode?"#18151d":skirt} roughness={0.58} />
       </RoundedBox>
       <RoundedBox
         args={[width, 0.3, 0.39]}
@@ -63,13 +62,17 @@ function Keycap({
         receiveShadow
       >
         <meshStandardMaterial
-          color={item.color || "#ffe2c5"}
-          emissive={darkMode?glow:"#000000"}
-          emissiveIntensity={darkMode?pressed?1.8:.72:0}
+          color={darkMode?"#34303a":item.color || "#ffe2c5"}
+          emissive={darkMode?"#ffffff":"#000000"}
+          emissiveIntensity={darkMode?.06:0}
           roughness={0.48}
         />
       </RoundedBox>
+      <RoundedBox args={[width*.9,.035,.34]} radius={.025} smoothness={3} position={[0,-.2,0]}>
+        <meshStandardMaterial ref={glowMaterial} color={darkMode?"#ff4f9a":"#000000"} emissive={darkMode?"#ff4f9a":"#000000"} emissiveIntensity={darkMode?1.55:0} transparent opacity={darkMode?.92:0}/>
+      </RoundedBox>
       <Text
+        ref={legend}
         position={[0, 0.225, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
         fontSize={item.label.length > 3 ? 0.072 : 0.1}
@@ -87,12 +90,10 @@ export function Keyboard({
   pressed,
   onKey,
   darkMode,
-  rgbColor,
 }: {
   pressed: Set<string>;
   onKey: (code: string, label: string) => void;
   darkMode: boolean;
-  rgbColor: string;
 }) {
   const keys = useMemo(
     () =>
@@ -138,7 +139,7 @@ export function Keyboard({
           position={[x, 0.36, 0.96]}
           castShadow
         >
-          <meshStandardMaterial color={darkMode?rgbColor:"#ffd8b6"} emissive={darkMode?rgbColor:"#000000"} emissiveIntensity={darkMode?.35:0} roughness={0.5} />
+          <meshStandardMaterial color={darkMode?"#413847":"#ffd8b6"} roughness={0.5} />
         </RoundedBox>
       ))}
       {[-0.15, 2.07].map((z) => (
@@ -150,7 +151,7 @@ export function Keyboard({
           position={[0, 0.36, z]}
           castShadow
         >
-          <meshStandardMaterial color={darkMode?rgbColor:"#ffd8b6"} emissive={darkMode?rgbColor:"#000000"} emissiveIntensity={darkMode?.35:0} roughness={0.5} />
+          <meshStandardMaterial color={darkMode?"#413847":"#ffd8b6"} roughness={0.5} />
         </RoundedBox>
       ))}
       {keys.flatMap((row, rowIndex) =>
@@ -163,7 +164,6 @@ export function Keyboard({
             pressed={pressed.has(key.code)}
             onPress={() => onKey(key.code, key.label)}
             darkMode={darkMode}
-            rgbColor={rgbColor}
           />
         )),
       )}

@@ -1,5 +1,14 @@
 import { Html, RoundedBox, Text } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
+import { useRef } from "react";
+import * as THREE from "three";
 import type { Difficulty, GamePhase } from "./game-data";
+
+function MusicNotes({playing}:{playing:boolean}){
+  const group=useRef<THREE.Group>(null!);
+  useFrame(state=>{if(!group.current||!playing)return;const time=state.clock.elapsedTime;group.current.children.forEach((child,index)=>{const phase=(time*.48+index*.34)%1;child.position.y=-2.18+phase*.95;child.position.x=.35+index*.42+Math.sin(time*1.8+index)*.08;const material=(child as any).material;if(material){material.opacity=Math.sin(phase*Math.PI)*.9;material.transparent=true}})});
+  return <group ref={group} visible={playing}>{["♪","♫","♩"].map((note,index)=><Text key={note} position={[.35+index*.42,-2.18,.94]} fontSize={.2+index*.025} color={index===1?"#8fc9bc":"#ef936e"} anchorX="center" anchorY="middle">{note}</Text>)}</group>
+}
 
 type Props = {
   typed: string;
@@ -41,7 +50,7 @@ export function Monitor({
   const windowStart = Math.max(0, typed.length - 34);
   const practice = passage.slice(windowStart, windowStart + 92);
   return (
-    <group position={[0, 0.88, -1.35]} scale={0.99}>
+    <group position={[0, 1.22, -1.35]} scale={1.04}>
       <RoundedBox
         args={[5.7, 3.65, 0.62]}
         radius={0.42}
@@ -198,6 +207,7 @@ export function Monitor({
       <Text position={[.58,-2.42,.93]} rotation={[-Math.PI/2,0,0]} fontSize={.1} color="#382b32" anchorX="center" anchorY="middle">{musicPlaying?"Ⅱ":"▶"}</Text>
       <RoundedBox args={[.3,.12,.2]} radius={.05} smoothness={4} position={[.98,-2.43,.82]} onPointerDown={event=>{event.stopPropagation();onNextTrack()}} castShadow><meshStandardMaterial color="#ef936e" roughness={.4}/></RoundedBox>
       <Text position={[.98,-2.42,.93]} rotation={[-Math.PI/2,0,0]} fontSize={.1} color="#382b32" anchorX="center" anchorY="middle">»</Text>
+      <MusicNotes playing={musicPlaying}/>
       <mesh position={[2.45, -1.42, 0.32]}>
         <sphereGeometry args={[0.06, 20, 20]} />
         <meshStandardMaterial

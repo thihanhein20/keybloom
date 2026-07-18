@@ -21,7 +21,6 @@ type Props = {
   accuracy: number;
   streak: number;
   darkMode: boolean;
-  rgbColor: string;
   musicPlaying: boolean;
   onMusic: () => void;
   onNextTrack: () => void;
@@ -41,7 +40,6 @@ export function DeskScene({
   start,
   reset,
   darkMode,
-  rgbColor,
   musicPlaying,
   onMusic,
   onNextTrack,
@@ -59,7 +57,7 @@ export function DeskScene({
         castShadow
         shadow-mapSize={[1024, 1024]}
       />
-      <pointLight position={[4,1,2]} intensity={darkMode?.5:.42} color={darkMode?rgbColor:"#ef9b68"}/>
+      <pointLight position={[4,1,2]} intensity={darkMode?.38:.42} color={darkMode?"#9178c8":"#ef9b68"}/>
       <Float speed={1.1} rotationIntensity={0.008} floatIntensity={0}>
         <group position={[0, 0, 4]} rotation={[0, 0.04, 0]}>
           <Monitor
@@ -74,7 +72,7 @@ export function DeskScene({
             onMusic={onMusic}
             onNextTrack={onNextTrack}
           />
-          <Keyboard pressed={pressed} onKey={onKey} darkMode={darkMode} rgbColor={rgbColor}/>
+          <Keyboard pressed={pressed} onKey={onKey} darkMode={darkMode}/>
           <Mouse darkMode={darkMode}/>
         </group>
       </Float>
