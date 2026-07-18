@@ -49,13 +49,11 @@ function Keyboard({ pressed, hit }: {pressed:Set<string>;hit:(code:string,label:
     <RoundedBox args={[7.55,.35,2.75]} radius={.24} smoothness={5} position={[0,.02,.95]} castShadow receiveShadow><meshStandardMaterial color="#df7d54" roughness={.42}/></RoundedBox>
     <RoundedBox args={[7.2,.12,2.42]} radius={.18} smoothness={4} position={[0,.22,.95]} receiveShadow><meshStandardMaterial color="#b85f47" roughness={.62}/></RoundedBox>
     {keyData.flatMap((row,ri)=>row.map(({k,x,z})=><Keycap key={`${ri}-${k.code}`} item={k} x={x} z={z} pressed={pressed.has(k.code)} onPress={()=>hit(k.code,k.label)}/>))}
-    <mesh position={[3.9,.1,1.6]} castShadow><cylinderGeometry args={[.07,.08,.7,24]}/><meshStandardMaterial color="#5d493d"/></mesh>
-    <mesh position={[3.9,.48,1.6]} castShadow><sphereGeometry args={[.18,24,24]}/><meshStandardMaterial color="#efb35c" roughness={.3}/></mesh>
   </group>;
 }
 
 function Monitor({ typed, active }: {typed:string;active:string}) {
-  return <group position={[0,1.85,-1.35]} scale={.78}>
+  return <group position={[0,1.5,-1.35]} scale={.78}>
     <RoundedBox args={[5.7,3.65,.62]} radius={.42} smoothness={8} castShadow receiveShadow><meshStandardMaterial color="#f29a67" roughness={.36}/></RoundedBox>
     <RoundedBox args={[5.08,3.08,.08]} radius={.28} smoothness={7} position={[0,.02,.35]}><meshStandardMaterial color="#7c4f46" roughness={.5}/></RoundedBox>
     <RoundedBox args={[4.64,2.68,.07]} radius={.22} smoothness={6} position={[0,.02,.41]}><meshStandardMaterial color="#241f2a" roughness={.28} emissive="#171322" emissiveIntensity={.5}/></RoundedBox>
@@ -80,7 +78,7 @@ function DeskScene({ pressed,typed,active,hit }:{pressed:Set<string>;typed:strin
     <Float speed={1.1} rotationIntensity={.025} floatIntensity={.08}><group rotation={[0,.04,0]}><Monitor typed={typed} active={active}/><Keyboard pressed={pressed} hit={hit}/></group></Float>
     <mesh rotation={[-Math.PI/2,0,0]} position={[0,-1.72,0]} receiveShadow><planeGeometry args={[40,40]}/><meshStandardMaterial color="#efb982" roughness={.83}/></mesh>
     <ContactShadows position={[0,-1.69,0]} opacity={.38} scale={14} blur={2.4} far={5}/><Environment preset="apartment"/>
-    <OrbitControls makeDefault enablePan={false} enableRotate={false} enableZoom={false} target={[0,-.72,.62]}/>
+    <OrbitControls makeDefault enablePan={false} enableRotate enableZoom={false} target={[0,-.72,.62]} minAzimuthAngle={-.16} maxAzimuthAngle={.16} minPolarAngle={.88} maxPolarAngle={1.06}/>
   </>;
 }
 
