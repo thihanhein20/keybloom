@@ -29,13 +29,17 @@ function playClick() {
 
 function Keycap({ item, x, z, pressed, onPress }: { item:KeyDef;x:number;z:number;pressed:boolean;onPress:()=>void }) {
   const ref=useRef<THREE.Group>(null!);
-  useFrame((_,d)=>{ const target=pressed ? .30 : .43; ref.current.position.y=THREE.MathUtils.damp(ref.current.position.y,target,22,d); });
+  useFrame((_,d)=>{ const target=pressed ? .32 : .47; ref.current.position.y=THREE.MathUtils.damp(ref.current.position.y,target,22,d); });
   const width=(item.width||1)*.44-.045;
-  return <group ref={ref} position={[x,.43,z]} onPointerDown={(e)=>{e.stopPropagation();onPress();}}>
-    <RoundedBox args={[width,.20,.39]} radius={.05} smoothness={3} castShadow receiveShadow>
+  const skirtColor=item.color==="#8fc9bc"?"#639d91":item.color?"#c96f58":"#c79576";
+  return <group ref={ref} position={[x,.47,z]} onPointerDown={(e)=>{e.stopPropagation();onPress();}}>
+    <RoundedBox args={[width*.92,.20,.35]} radius={.038} smoothness={3} position={[0,-.08,0]} castShadow receiveShadow>
+      <meshStandardMaterial color={skirtColor} roughness={.58}/>
+    </RoundedBox>
+    <RoundedBox args={[width,.30,.39]} radius={.06} smoothness={4} position={[0,.07,0]} castShadow receiveShadow>
       <meshStandardMaterial color={item.color||"#ffe2c5"} roughness={.48}/>
     </RoundedBox>
-    <Text position={[0,.108,0]} rotation={[-Math.PI/2,0,0]} fontSize={item.label.length>3?.072:.095} color="#744e42" anchorX="center" anchorY="middle">{item.label}</Text>
+    <Text position={[0,.225,0]} rotation={[-Math.PI/2,0,0]} fontSize={item.label.length>3?.072:.10} color="#744e42" anchorX="center" anchorY="middle">{item.label}</Text>
   </group>;
 }
 
