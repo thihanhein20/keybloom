@@ -41,7 +41,7 @@ function Keycap({ item, x, z, pressed, onPress }: { item:KeyDef;x:number;z:numbe
 
 function Keyboard({ pressed, hit }: {pressed:Set<string>;hit:(code:string,label:string)=>void}) {
   const keyData=useMemo(()=>rows.map((row,ri)=>{const total=row.reduce((a,k)=>a+(k.width||1),0);let cursor=-total*.22;return row.map(k=>{const width=(k.width||1)*.44;const x=cursor+width/2;cursor+=width;return {k,x,z:ri*.44+.08};});}),[]);
-  return <group position={[0,-1.45,.2]} rotation={[-.10,0,0]}>
+  return <group position={[0,-1.5,.85]} rotation={[-.10,0,0]}>
     <RoundedBox args={[7.55,.35,2.75]} radius={.24} smoothness={5} position={[0,.02,.95]} castShadow receiveShadow><meshStandardMaterial color="#df7d54" roughness={.42}/></RoundedBox>
     <RoundedBox args={[7.2,.12,2.42]} radius={.18} smoothness={4} position={[0,.22,.95]} receiveShadow><meshStandardMaterial color="#b85f47" roughness={.62}/></RoundedBox>
     {keyData.flatMap((row,ri)=>row.map(({k,x,z})=><Keycap key={`${ri}-${k.code}`} item={k} x={x} z={z} pressed={pressed.has(k.code)} onPress={()=>hit(k.code,k.label)}/>))}
@@ -51,7 +51,7 @@ function Keyboard({ pressed, hit }: {pressed:Set<string>;hit:(code:string,label:
 }
 
 function Monitor({ typed, active }: {typed:string;active:string}) {
-  return <group position={[0,1.15,.65]}>
+  return <group position={[0,1.5,-.9]}>
     <RoundedBox args={[5.7,3.65,.62]} radius={.42} smoothness={8} castShadow receiveShadow><meshStandardMaterial color="#f29a67" roughness={.36}/></RoundedBox>
     <RoundedBox args={[5.08,3.08,.08]} radius={.28} smoothness={7} position={[0,.02,.35]}><meshStandardMaterial color="#7c4f46" roughness={.5}/></RoundedBox>
     <RoundedBox args={[4.64,2.68,.07]} radius={.22} smoothness={6} position={[0,.02,.41]}><meshStandardMaterial color="#241f2a" roughness={.28} emissive="#171322" emissiveIntensity={.5}/></RoundedBox>
