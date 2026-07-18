@@ -1,128 +1,92 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
+import { ContactShadows, Environment, Float, Html, OrbitControls, RoundedBox, Text } from "@react-three/drei";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import * as THREE from "three";
 
-const chapters = [
-  { n: "01", title: "Drift", note: "A sea that remembers the moon", className: "amber" },
-  { n: "02", title: "Bloom", note: "Where gravity learns to flower", className: "violet" },
-  { n: "03", title: "Echo", note: "The architecture of a vanished song", className: "cyan" },
+type KeyDef = { label: string; code: string; width?: number; color?: string };
+const rows: KeyDef[][] = [
+  ["Esc","1","2","3","4","5","6","7","8","9","0","-","=","⌫"].map((label,i)=>({label,code:i===0?"Escape":i===13?"Backspace":`Digit${label}`.replace("Digit-","Minus").replace("Digit=","Equal"),width:i===13?1.55:1,color:i===0?"#8fc9bc":undefined})),
+  [{label:"Tab",code:"Tab",width:1.35},..."QWERTYUIOP".split("").map(label=>({label,code:`Key${label}`})),{label:"[",code:"BracketLeft"},{label:"]",code:"BracketRight"},{label:"\\",code:"Backslash",width:1.35}],
+  [{label:"Caps",code:"CapsLock",width:1.65},..."ASDFGHJKL".split("").map(label=>({label,code:`Key${label}`})),{label:";",code:"Semicolon"},{label:"'",code:"Quote"},{label:"Enter",code:"Enter",width:1.75,color:"#ef936e"}],
+  [{label:"Shift",code:"ShiftLeft",width:2.05},..."ZXCVBNM".split("").map(label=>({label,code:`Key${label}`})),{label:",",code:"Comma"},{label:".",code:"Period"},{label:"/",code:"Slash"},{label:"Shift",code:"ShiftRight",width:2.2}],
+  [{label:"Ctrl",code:"ControlLeft",width:1.25},{label:"⌘",code:"MetaLeft",width:1.2},{label:"Alt",code:"AltLeft",width:1.2},{label:"space",code:"Space",width:6.15,color:"#f2a276"},{label:"Alt",code:"AltRight",width:1.2},{label:"←",code:"ArrowLeft"},{label:"↑",code:"ArrowUp"},{label:"↓",code:"ArrowDown"},{label:"→",code:"ArrowRight"}],
 ];
 
-function Starfield() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    const canvas = canvasRef.current!;
-    const ctx = canvas.getContext("2d")!;
-    let frame = 0;
-    let w = 0, h = 0;
-    const stars = Array.from({ length: 180 }, (_, i) => ({
-      x: Math.random(), y: Math.random(), z: Math.random(), r: Math.random() * 1.4 + .2, s: .00008 + Math.random() * .0002, i
-    }));
-    const resize = () => { w = canvas.width = innerWidth * devicePixelRatio; h = canvas.height = innerHeight * devicePixelRatio; };
-    const draw = () => {
-      ctx.clearRect(0, 0, w, h);
-      for (const p of stars) {
-        p.y -= p.s; if (p.y < 0) p.y = 1;
-        const pulse = .35 + .65 * Math.sin(Date.now() * .001 + p.i);
-        ctx.fillStyle = `rgba(230,239,255,${pulse * (.25 + p.z * .65)})`;
-        ctx.beginPath(); ctx.arc(p.x * w, p.y * h, p.r * devicePixelRatio * (.5 + p.z), 0, 7); ctx.fill();
-      }
-      frame = requestAnimationFrame(draw);
-    };
-    resize(); addEventListener("resize", resize); draw();
-    return () => { cancelAnimationFrame(frame); removeEventListener("resize", resize); };
-  }, []);
-  return <canvas ref={canvasRef} className="starfield" aria-hidden="true" />;
+function playClick() {
+  const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+  const ctx = new AudioCtx();
+  const now = ctx.currentTime;
+  const osc = ctx.createOscillator(); const gain = ctx.createGain();
+  const buffer = ctx.createBuffer(1, ctx.sampleRate * .025, ctx.sampleRate); const data = buffer.getChannelData(0);
+  for(let i=0;i<data.length;i++) data[i]=(Math.random()*2-1)*Math.pow(1-i/data.length,3);
+  const noise=ctx.createBufferSource(); noise.buffer=buffer; const filter=ctx.createBiquadFilter(); filter.type="bandpass"; filter.frequency.value=1450;
+  osc.type="sine"; osc.frequency.setValueAtTime(105,now); osc.frequency.exponentialRampToValueAtTime(65,now+.045);
+  gain.gain.setValueAtTime(.11,now); gain.gain.exponentialRampToValueAtTime(.001,now+.055);
+  noise.connect(filter).connect(gain); osc.connect(gain).connect(ctx.destination); noise.start(now); osc.start(now); osc.stop(now+.06); setTimeout(()=>ctx.close(),120);
 }
 
-function Orrery({ entered }: { entered: boolean }) {
-  return (
-    <div className={`orrery ${entered ? "awakened" : ""}`} aria-hidden="true">
-      <div className="halo halo-a" />
-      <div className="halo halo-b" />
-      <div className="halo halo-c" />
-      <div className="orbit orbit-a"><i /></div>
-      <div className="orbit orbit-b"><i /></div>
-      <div className="orbit orbit-c"><i /></div>
-      <div className="core"><div className="core-inner" /></div>
-      <div className="flare" />
-    </div>
-  );
+function Keycap({ item, x, z, pressed, onPress }: { item:KeyDef;x:number;z:number;pressed:boolean;onPress:()=>void }) {
+  const ref=useRef<THREE.Group>(null!);
+  useFrame((_,d)=>{ const target=pressed ? .30 : .43; ref.current.position.y=THREE.MathUtils.damp(ref.current.position.y,target,22,d); });
+  const width=(item.width||1)*.48-.035;
+  return <group ref={ref} position={[x,.43,z]} onPointerDown={(e)=>{e.stopPropagation();onPress();}}>
+    <RoundedBox args={[width,.20,.43]} radius={.055} smoothness={3} castShadow receiveShadow>
+      <meshStandardMaterial color={item.color||"#ffe2c5"} roughness={.48}/>
+    </RoundedBox>
+    <Text position={[0,.108,0]} rotation={[-Math.PI/2,0,0]} fontSize={item.label.length>3?.072:.095} color="#744e42" anchorX="center" anchorY="middle">{item.label}</Text>
+  </group>;
 }
 
-export default function Home() {
-  const [entered, setEntered] = useState(false);
-  const [sound, setSound] = useState(false);
-  const [cursor, setCursor] = useState({ x: -100, y: -100 });
-  const [progress, setProgress] = useState(0);
+function Keyboard({ pressed, hit }: {pressed:Set<string>;hit:(code:string,label:string)=>void}) {
+  const keyData=useMemo(()=>rows.map((row,ri)=>{const total=row.reduce((a,k)=>a+(k.width||1),0);let cursor=-total*.24;return row.map(k=>{const width=(k.width||1)*.48;const x=cursor+width/2;cursor+=width;return {k,x,z:ri*.48};});}),[]);
+  return <group position={[0,-1.45,.2]} rotation={[-.10,0,0]}>
+    <RoundedBox args={[7.55,.35,2.75]} radius={.24} smoothness={5} position={[0,.02,.95]} castShadow receiveShadow><meshStandardMaterial color="#df7d54" roughness={.42}/></RoundedBox>
+    <RoundedBox args={[7.2,.12,2.42]} radius={.18} smoothness={4} position={[0,.22,.95]} receiveShadow><meshStandardMaterial color="#b85f47" roughness={.62}/></RoundedBox>
+    {keyData.flatMap((row,ri)=>row.map(({k,x,z})=><Keycap key={`${ri}-${k.code}`} item={k} x={x} z={z} pressed={pressed.has(k.code)} onPress={()=>hit(k.code,k.label)}/>))}
+    <mesh position={[3.9,.1,1.6]} castShadow><cylinderGeometry args={[.07,.08,.7,24]}/><meshStandardMaterial color="#5d493d"/></mesh>
+    <mesh position={[3.9,.48,1.6]} castShadow><sphereGeometry args={[.18,24,24]}/><meshStandardMaterial color="#efb35c" roughness={.3}/></mesh>
+  </group>;
+}
 
-  useEffect(() => {
-    const move = (e: PointerEvent) => {
-      setCursor({ x: e.clientX, y: e.clientY });
-      document.documentElement.style.setProperty("--mx", `${(e.clientX / innerWidth - .5) * 2}`);
-      document.documentElement.style.setProperty("--my", `${(e.clientY / innerHeight - .5) * 2}`);
-    };
-    const scroll = () => setProgress(scrollY / Math.max(1, document.body.scrollHeight - innerHeight));
-    addEventListener("pointermove", move); addEventListener("scroll", scroll, { passive: true });
-    return () => { removeEventListener("pointermove", move); removeEventListener("scroll", scroll); };
-  }, []);
+function Monitor({ typed, active }: {typed:string;active:string}) {
+  return <group position={[0,1.15,.65]}>
+    <RoundedBox args={[5.7,3.65,.62]} radius={.42} smoothness={8} castShadow receiveShadow><meshStandardMaterial color="#f29a67" roughness={.36}/></RoundedBox>
+    <RoundedBox args={[5.08,3.08,.08]} radius={.28} smoothness={7} position={[0,.02,.35]}><meshStandardMaterial color="#7c4f46" roughness={.5}/></RoundedBox>
+    <RoundedBox args={[4.64,2.68,.07]} radius={.22} smoothness={6} position={[0,.02,.41]}><meshStandardMaterial color="#241f2a" roughness={.28} emissive="#171322" emissiveIntensity={.5}/></RoundedBox>
+    <Html transform position={[0,.02,.46]} distanceFactor={2.85}>
+      <div className="screen">
+        <div className="screen-top"><span>PEACH_OS</span><span>● ONLINE</span></div>
+        <div className="face">{active?<><i>•</i><b>ᴗ</b><i>•</i></>:<><i>˶</i><b>◡</b><i>˶</i></>}</div>
+        <div className="typed">{typed || "type something cozy"}<span className="caret"/></div>
+        <div className="screen-bottom">keyboard friend v1.0</div>
+      </div>
+    </Html>
+    <mesh position={[0,-2.15,.15]} castShadow><cylinderGeometry args={[.62,.78,.85,32]}/><meshStandardMaterial color="#df7d54" roughness={.45}/></mesh>
+    <RoundedBox args={[2.5,.22,1.2]} radius={.18} smoothness={4} position={[0,-2.6,.15]} castShadow><meshStandardMaterial color="#d76f50" roughness={.48}/></RoundedBox>
+    <mesh position={[2.45,-1.42,.32]}><sphereGeometry args={[.06,20,20]}/><meshStandardMaterial color="#ffda78" emissive="#ffb347" emissiveIntensity={2}/></mesh>
+  </group>;
+}
 
-  const enter = () => { setEntered(true); setTimeout(() => document.querySelector("#chapters")?.scrollIntoView({ behavior: "smooth" }), 850); };
+function DeskScene({ pressed,typed,active,hit }:{pressed:Set<string>;typed:string;active:string;hit:(c:string,l:string)=>void}) {
+  return <>
+    <color attach="background" args={["#f7cfa7"]}/><fog attach="fog" args={["#f7cfa7",12,24]}/>
+    <ambientLight intensity={1.6}/><directionalLight position={[-5,8,6]} intensity={3.2} color="#fff1d8" castShadow shadow-mapSize={[2048,2048]}/><pointLight position={[5,1,3]} intensity={1.4} color="#ffd08c"/>
+    <Float speed={1.1} rotationIntensity={.025} floatIntensity={.08}><group rotation={[0,.04,0]}><Monitor typed={typed} active={active}/><Keyboard pressed={pressed} hit={hit}/></group></Float>
+    <mesh rotation={[-Math.PI/2,0,0]} position={[0,-1.72,0]} receiveShadow><planeGeometry args={[40,40]}/><meshStandardMaterial color="#efb982" roughness={.83}/></mesh>
+    <ContactShadows position={[0,-1.69,0]} opacity={.38} scale={14} blur={2.4} far={5}/><Environment preset="apartment"/>
+    <OrbitControls makeDefault enablePan={false} minDistance={7.5} maxDistance={12} minPolarAngle={.75} maxPolarAngle={1.35} target={[0,0,.5]}/>
+  </>;
+}
 
-  return (
-    <main className={entered ? "entered" : ""}>
-      <Starfield />
-      <div className="grain" />
-      <div className="cursor" style={{ transform: `translate(${cursor.x}px,${cursor.y}px)` }} />
-      <div className="progress" style={{ transform: `scaleX(${progress})` }} />
-
-      <nav>
-        <a href="#top" className="sigil" aria-label="Astra Noctis home"><span>✦</span> AN</a>
-        <span className="nav-title">Astra Noctis / An interactive reverie</span>
-        <button className="sound" onClick={() => setSound(!sound)} aria-label="Toggle ambient sound">
-          <span className={sound ? "playing bars" : "bars"}><i/><i/><i/><i/></span>{sound ? "Sound on" : "Sound off"}
-        </button>
-      </nav>
-
-      <section className="hero" id="top">
-        <div className="coordinates">34° 12′ 08″ N<br/>118° 14′ 37″ W</div>
-        <div className="hero-copy">
-          <p className="eyebrow"><span /> An archive beyond time</p>
-          <h1><span>ASTRA</span><em>NOCTIS</em></h1>
-          <p className="lede">A dream in three dimensions.<br/>Best experienced slowly.</p>
-          <button className="enter" onClick={enter}><span>Enter the dream</span><i>↗</i></button>
-        </div>
-        <Orrery entered={entered} />
-        <div className="scroll-mark"><span>Scroll to descend</span><i /></div>
-        <div className="edition">VOL. I<br/><b>MMXXVI</b></div>
-      </section>
-
-      <section className="manifesto" id="chapters">
-        <p className="chapter-no">/ 00 — PROLOGUE</p>
-        <h2>Somewhere between<br/><em>memory</em> and <em>starlight,</em><br/>a world is waiting.</h2>
-        <p className="manifesto-copy">This is not a place you visit.<br/>It is a place that visits you.</p>
-        <div className="eclipse"><i/><span/></div>
-      </section>
-
-      <section className="chapters">
-        <header><span>/ THE THREE MOVEMENTS</span><span>Choose a fragment</span></header>
-        <div className="chapter-grid">
-          {chapters.map((c) => (
-            <article className={`chapter ${c.className}`} key={c.n} tabIndex={0}>
-              <div className="portal"><div className="portal-world"><i/><b/></div><span className="ring-label">ASTRA · NOCTIS · {c.title.toUpperCase()} ·</span></div>
-              <div className="chapter-info"><span>{c.n}</span><h3>{c.title}</h3><p>{c.note}</p><button aria-label={`Explore ${c.title}`}>↗</button></div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="finale">
-        <div className="final-orbit"><i/><i/><i/></div>
-        <p>THE DREAM CONTINUES</p>
-        <h2>Look closer.<br/><em>Nothing is still.</em></h2>
-        <a href="#top">Return to the beginning <span>↑</span></a>
-        <footer><span>ASTRA NOCTIS © 2026</span><span>Made for the space between worlds</span><span>✦</span></footer>
-      </section>
-    </main>
-  );
+export default function Home(){
+  const [pressed,setPressed]=useState<Set<string>>(new Set()); const [typed,setTyped]=useState(""); const [active,setActive]=useState(""); const timers=useRef<Record<string,ReturnType<typeof setTimeout>>>({});
+  const hit=useCallback((code:string,label:string)=>{
+    setPressed(p=>new Set(p).add(code)); setActive(label); playClick(); clearTimeout(timers.current[code]); timers.current[code]=setTimeout(()=>setPressed(p=>{const n=new Set(p);n.delete(code);return n}),110);
+    if(label==="⌫") setTyped(t=>t.slice(0,-1)); else if(label==="Enter") setTyped(t=>`${t} ↵ `); else if(label==="space") setTyped(t=>(t+" ").slice(-38)); else if(label.length===1) setTyped(t=>(t+label.toLowerCase()).slice(-38));
+    setTimeout(()=>setActive(""),180);
+  },[]);
+  useEffect(()=>{const down=(e:KeyboardEvent)=>{if(e.repeat)return;e.preventDefault();hit(e.code,e.key===" "?"space":e.key==="Backspace"?"⌫":e.key.length===1?e.key:e.key)};const up=(e:KeyboardEvent)=>setPressed(p=>{const n=new Set(p);n.delete(e.code);return n});addEventListener("keydown",down);addEventListener("keyup",up);return()=>{removeEventListener("keydown",down);removeEventListener("keyup",up)}},[hit]);
+  return <main><header><a href="#" className="brand"><span>⌁</span> keybloom</a><p>a tiny place for big thoughts</p><div className="status"><i/> ready to type</div></header><div className="canvas"><Canvas shadows dpr={[1,1.75]} camera={{position:[0,3.7,9.2],fov:38}}><Suspense fallback={null}><DeskScene pressed={pressed} typed={typed} active={active} hit={hit}/></Suspense></Canvas></div><div className="intro"><p>INTERACTIVE DESK FRIEND / 001</p><h1>Make a little<br/><em>click-clack.</em></h1><span>Use your real keyboard—or tap a keycap.<br/>Drag to look around. Scroll to zoom.</span></div><aside><b>{active||"—"}</b><span>last key</span></aside><div className="hint"><i>⌨</i><span>Start typing<br/><b>every key is alive</b></span></div></main>
 }
