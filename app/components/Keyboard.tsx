@@ -51,7 +51,7 @@ function Keycap({
         castShadow
         receiveShadow
       >
-        <meshStandardMaterial color={darkMode?"#18151d":skirt} roughness={0.58} />
+        <meshStandardMaterial color={darkMode?"#322c38":skirt} roughness={0.58} />
       </RoundedBox>
       <RoundedBox
         args={[width, 0.3, 0.39]}
@@ -62,10 +62,10 @@ function Keycap({
         receiveShadow
       >
         <meshStandardMaterial
-          color={darkMode?"#34303a":item.color || "#ffe2c5"}
-          emissive={darkMode?"#ffffff":"#000000"}
-          emissiveIntensity={darkMode?.06:0}
-          roughness={0.48}
+          color={darkMode?"#5d5563":item.color || "#ffe2c5"}
+          emissive="#000000"
+          emissiveIntensity={0}
+          roughness={darkMode?.6:.48}
         />
       </RoundedBox>
       <RoundedBox args={[width*.9,.035,.34]} radius={.025} smoothness={3} position={[0,-.2,0]}>
@@ -119,7 +119,7 @@ export function Keyboard({
         castShadow
         receiveShadow
       >
-        <meshStandardMaterial color={darkMode?"#24202d":"#f3c49d"} roughness={0.5} />
+        <meshStandardMaterial color={darkMode?"#443b4a":"#f3c49d"} roughness={0.55} />
       </RoundedBox>
       <RoundedBox
         args={[7.04, 0.15, 2.36]}
@@ -128,7 +128,7 @@ export function Keyboard({
         position={[0, 0.25, 0.96]}
         receiveShadow
       >
-        <meshStandardMaterial color={darkMode?"#302839":"#d97958"} roughness={0.66} />
+        <meshStandardMaterial color={darkMode?"#514354":"#d97958"} roughness={0.66} />
       </RoundedBox>
       {[-3.43, 3.43].map((x) => (
         <RoundedBox
@@ -139,7 +139,7 @@ export function Keyboard({
           position={[x, 0.36, 0.96]}
           castShadow
         >
-          <meshStandardMaterial color={darkMode?"#413847":"#ffd8b6"} roughness={0.5} />
+          <meshStandardMaterial color={darkMode?"#6b586d":"#ffd8b6"} roughness={0.5} />
         </RoundedBox>
       ))}
       {[-0.15, 2.07].map((z) => (
@@ -151,7 +151,7 @@ export function Keyboard({
           position={[0, 0.36, z]}
           castShadow
         >
-          <meshStandardMaterial color={darkMode?"#413847":"#ffd8b6"} roughness={0.5} />
+          <meshStandardMaterial color={darkMode?"#6b586d":"#ffd8b6"} roughness={0.5} />
         </RoundedBox>
       ))}
       {keys.flatMap((row, rowIndex) =>
@@ -167,6 +167,7 @@ export function Keyboard({
           />
         )),
       )}
+      <RoundedBox args={[6.72,.035,.055]} radius={.018} smoothness={3} position={[0,.38,2.075]}><meshStandardMaterial color={darkMode?"#8fc9bc":"#ffd8b6"} emissive={darkMode?"#70bdae":"#000000"} emissiveIntensity={darkMode?.75:0} transparent opacity={darkMode?.82:0}/></RoundedBox>
     </group>
   );
 }

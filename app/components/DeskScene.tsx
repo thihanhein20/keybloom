@@ -8,6 +8,17 @@ import { Keyboard } from "./Keyboard";
 import { Monitor } from "./Monitor";
 import { Mouse } from "./Mouse";
 import type { Difficulty, GamePhase } from "./game-data";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useMemo, useRef } from "react";
+import * as THREE from "three";
+
+function AnimatedAtmosphere({darkMode}:{darkMode:boolean}){
+  const ambient=useRef<THREE.AmbientLight>(null!);const sun=useRef<THREE.DirectionalLight>(null!);const accent=useRef<THREE.PointLight>(null!);const {scene}=useThree();
+  const initialDark=useRef(darkMode).current;const initialBackground=initialDark?"#171421":"#f3c69d";
+  const palette=useMemo(()=>({day:{background:new THREE.Color("#f3c69d"),ambient:new THREE.Color("#fff0db"),sun:new THREE.Color("#fff1d8"),accent:new THREE.Color("#ef9b68")},night:{background:new THREE.Color("#171421"),ambient:new THREE.Color("#9b8cc8"),sun:new THREE.Color("#b5a3df"),accent:new THREE.Color("#9178c8")}}),[]);
+  useFrame((_,delta)=>{const target=darkMode?palette.night:palette.day;const speed=1-Math.exp(-delta*2.5);const background=scene.background as THREE.Color;background?.lerp(target.background,speed);if(scene.fog instanceof THREE.Fog)scene.fog.color.lerp(target.background,speed);ambient.current.color.lerp(target.ambient,speed);sun.current.color.lerp(target.sun,speed);accent.current.color.lerp(target.accent,speed);ambient.current.intensity=THREE.MathUtils.damp(ambient.current.intensity,darkMode?.62:.9,3,delta);sun.current.intensity=THREE.MathUtils.damp(sun.current.intensity,darkMode?1.4:2.05,3,delta);accent.current.intensity=THREE.MathUtils.damp(accent.current.intensity,darkMode?.62:.42,3,delta)});
+  return <><color attach="background" args={[initialBackground]}/><fog attach="fog" args={[initialBackground,12,24]}/><ambientLight ref={ambient} intensity={initialDark?.62:.9} color={initialDark?"#9b8cc8":"#fff0db"}/><directionalLight ref={sun} position={[-5,8,6]} intensity={initialDark?1.4:2.05} color={initialDark?"#b5a3df":"#fff1d8"} castShadow shadow-mapSize={[1024,1024]}/><pointLight ref={accent} position={[4,1,2]} intensity={initialDark?.62:.42} color={initialDark?"#9178c8":"#ef9b68"}/></>
+}
 
 type Props = {
   pressed: Set<string>;
@@ -47,17 +58,7 @@ export function DeskScene({
 }: Props) {
   return (
     <>
-      <color attach="background" args={[darkMode?"#171421":"#f3c69d"]} />
-      <fog attach="fog" args={[darkMode?"#171421":"#f3c69d", 12, 24]} />
-      <ambientLight intensity={darkMode?.42:.9} color={darkMode?"#8577b8":"#fff0db"}/>
-      <directionalLight
-        position={[-5, 8, 6]}
-        intensity={darkMode?1.25:2.05}
-        color={darkMode?"#9c8cce":"#fff1d8"}
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-      />
-      <pointLight position={[4,1,2]} intensity={darkMode?.38:.42} color={darkMode?"#9178c8":"#ef9b68"}/>
+      <AnimatedAtmosphere darkMode={darkMode}/>
       <Float speed={1.1} rotationIntensity={0.008} floatIntensity={0}>
         <group position={[0, 0, 4]} rotation={[0, 0.04, 0]}>
           <Monitor
