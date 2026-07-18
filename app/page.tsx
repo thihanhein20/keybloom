@@ -55,7 +55,7 @@ function Keyboard({ pressed, hit }: {pressed:Set<string>;hit:(code:string,label:
 }
 
 function Monitor({ typed, active }: {typed:string;active:string}) {
-  return <group position={[0,1.5,-.9]}>
+  return <group position={[0,1.68,-1.18]} scale={.9}>
     <RoundedBox args={[5.7,3.65,.62]} radius={.42} smoothness={8} castShadow receiveShadow><meshStandardMaterial color="#f29a67" roughness={.36}/></RoundedBox>
     <RoundedBox args={[5.08,3.08,.08]} radius={.28} smoothness={7} position={[0,.02,.35]}><meshStandardMaterial color="#7c4f46" roughness={.5}/></RoundedBox>
     <RoundedBox args={[4.64,2.68,.07]} radius={.22} smoothness={6} position={[0,.02,.41]}><meshStandardMaterial color="#241f2a" roughness={.28} emissive="#171322" emissiveIntensity={.5}/></RoundedBox>
@@ -80,7 +80,7 @@ function DeskScene({ pressed,typed,active,hit }:{pressed:Set<string>;typed:strin
     <Float speed={1.1} rotationIntensity={.025} floatIntensity={.08}><group rotation={[0,.04,0]}><Monitor typed={typed} active={active}/><Keyboard pressed={pressed} hit={hit}/></group></Float>
     <mesh rotation={[-Math.PI/2,0,0]} position={[0,-1.72,0]} receiveShadow><planeGeometry args={[40,40]}/><meshStandardMaterial color="#efb982" roughness={.83}/></mesh>
     <ContactShadows position={[0,-1.69,0]} opacity={.38} scale={14} blur={2.4} far={5}/><Environment preset="apartment"/>
-    <OrbitControls makeDefault enablePan={false} minDistance={7.5} maxDistance={12} minPolarAngle={.75} maxPolarAngle={1.35} target={[0,0,.5]}/>
+    <OrbitControls makeDefault enablePan={false} enableRotate={false} enableZoom={false} target={[0,-.05,.25]}/>
   </>;
 }
 
@@ -92,5 +92,5 @@ export default function Home(){
     setTimeout(()=>setActive(""),180);
   },[]);
   useEffect(()=>{const down=(e:KeyboardEvent)=>{if(e.repeat)return;e.preventDefault();hit(e.code,e.key===" "?"space":e.key==="Backspace"?"⌫":e.key.length===1?e.key:e.key)};const up=(e:KeyboardEvent)=>setPressed(p=>{const n=new Set(p);n.delete(e.code);return n});addEventListener("keydown",down);addEventListener("keyup",up);return()=>{removeEventListener("keydown",down);removeEventListener("keyup",up)}},[hit]);
-  return <main><header><a href="#" className="brand"><span>⌁</span> keybloom</a><p>a tiny place for big thoughts</p><div className="status"><i/> ready to type</div></header><div className="canvas"><Canvas shadows dpr={[1,1.75]} camera={{position:[0,3.7,9.2],fov:38}}><Suspense fallback={null}><DeskScene pressed={pressed} typed={typed} active={active} hit={hit}/></Suspense></Canvas></div><div className="intro"><p>INTERACTIVE DESK FRIEND / 001</p><h1>Make a little<br/><em>click-clack.</em></h1><span>Use your real keyboard—or tap a keycap.<br/>Drag to look around. Scroll to zoom.</span></div><aside><b>{active||"—"}</b><span>last key</span></aside><div className="hint"><i>⌨</i><span>Start typing<br/><b>every key is alive</b></span></div></main>
+  return <main><header><a href="#" className="brand"><span>⌁</span> keybloom</a><p>a tiny place for big thoughts</p><div className="status"><i/> ready to type</div></header><div className="canvas"><Canvas shadows dpr={[1,1.75]} camera={{position:[0,3.9,10.2],fov:37}}><Suspense fallback={null}><DeskScene pressed={pressed} typed={typed} active={active} hit={hit}/></Suspense></Canvas></div><div className="intro"><p>INTERACTIVE DESK FRIEND / 001</p><h1>Make a little<br/><em>click-clack.</em></h1><span>Use your real keyboard—or tap a keycap.<br/>Every little key is waiting for you.</span></div><aside><b>{active||"—"}</b><span>last key</span></aside><div className="hint"><i>⌨</i><span>Start typing<br/><b>every key is alive</b></span></div></main>
 }
