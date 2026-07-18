@@ -5,7 +5,7 @@ type Props={typed:string;active:string;passage:string;difficulty:Difficulty;minu
 export function Monitor({typed,active,passage,difficulty,minutes,phase,secondsLeft,accuracy,onDifficulty,onMinutes,onStart,onReset}:Props){
   const clock=`${String(Math.floor(secondsLeft/60)).padStart(2,"0")}:${String(secondsLeft%60).padStart(2,"0")}`;
   const windowStart=Math.max(0,typed.length-34); const practice=passage.slice(windowStart,windowStart+92);
-  return <group position={[0,.48,-1.35]} scale={.78}>
+  return <group position={[0,.88,-1.35]} scale={.92}>
     <RoundedBox args={[5.7,3.65,.62]} radius={.42} smoothness={8} castShadow receiveShadow><meshStandardMaterial color="#f29a67" roughness={.36}/></RoundedBox>
     <RoundedBox args={[5.08,3.08,.08]} radius={.28} smoothness={7} position={[0,.02,.35]}><meshStandardMaterial color="#7c4f46" roughness={.5}/></RoundedBox>
     <RoundedBox args={[4.64,2.68,.07]} radius={.22} smoothness={6} position={[0,.02,.41]}><meshStandardMaterial color="#241f2a" roughness={.28} emissive="#171322" emissiveIntensity={.5}/></RoundedBox>
