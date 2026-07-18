@@ -30,9 +30,9 @@ function playClick() {
 function Keycap({ item, x, z, pressed, onPress }: { item:KeyDef;x:number;z:number;pressed:boolean;onPress:()=>void }) {
   const ref=useRef<THREE.Group>(null!);
   useFrame((_,d)=>{ const target=pressed ? .30 : .43; ref.current.position.y=THREE.MathUtils.damp(ref.current.position.y,target,22,d); });
-  const width=(item.width||1)*.48-.035;
+  const width=(item.width||1)*.44-.045;
   return <group ref={ref} position={[x,.43,z]} onPointerDown={(e)=>{e.stopPropagation();onPress();}}>
-    <RoundedBox args={[width,.20,.43]} radius={.055} smoothness={3} castShadow receiveShadow>
+    <RoundedBox args={[width,.20,.39]} radius={.05} smoothness={3} castShadow receiveShadow>
       <meshStandardMaterial color={item.color||"#ffe2c5"} roughness={.48}/>
     </RoundedBox>
     <Text position={[0,.108,0]} rotation={[-Math.PI/2,0,0]} fontSize={item.label.length>3?.072:.095} color="#744e42" anchorX="center" anchorY="middle">{item.label}</Text>
@@ -40,7 +40,7 @@ function Keycap({ item, x, z, pressed, onPress }: { item:KeyDef;x:number;z:numbe
 }
 
 function Keyboard({ pressed, hit }: {pressed:Set<string>;hit:(code:string,label:string)=>void}) {
-  const keyData=useMemo(()=>rows.map((row,ri)=>{const total=row.reduce((a,k)=>a+(k.width||1),0);let cursor=-total*.24;return row.map(k=>{const width=(k.width||1)*.48;const x=cursor+width/2;cursor+=width;return {k,x,z:ri*.48};});}),[]);
+  const keyData=useMemo(()=>rows.map((row,ri)=>{const total=row.reduce((a,k)=>a+(k.width||1),0);let cursor=-total*.22;return row.map(k=>{const width=(k.width||1)*.44;const x=cursor+width/2;cursor+=width;return {k,x,z:ri*.44+.08};});}),[]);
   return <group position={[0,-1.45,.2]} rotation={[-.10,0,0]}>
     <RoundedBox args={[7.55,.35,2.75]} radius={.24} smoothness={5} position={[0,.02,.95]} castShadow receiveShadow><meshStandardMaterial color="#df7d54" roughness={.42}/></RoundedBox>
     <RoundedBox args={[7.2,.12,2.42]} radius={.18} smoothness={4} position={[0,.22,.95]} receiveShadow><meshStandardMaterial color="#b85f47" roughness={.62}/></RoundedBox>
