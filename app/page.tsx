@@ -46,14 +46,30 @@ function Keycap({ item, x, z, pressed, onPress }: { item:KeyDef;x:number;z:numbe
 function Keyboard({ pressed, hit }: {pressed:Set<string>;hit:(code:string,label:string)=>void}) {
   const keyData=useMemo(()=>rows.map((row,ri)=>{const total=row.reduce((a,k)=>a+(k.width||1),0);let cursor=-total*.22;return row.map(k=>{const width=(k.width||1)*.44;const x=cursor+width/2;cursor+=width;return {k,x,z:ri*.44+.08};});}),[]);
   return <group position={[0,-1.35,.85]} rotation={[-.16,0,0]} scale={1.06}>
-    <RoundedBox args={[7.55,.35,2.75]} radius={.24} smoothness={5} position={[0,.02,.95]} castShadow receiveShadow><meshStandardMaterial color="#df7d54" roughness={.42}/></RoundedBox>
-    <RoundedBox args={[7.2,.12,2.42]} radius={.18} smoothness={4} position={[0,.22,.95]} receiveShadow><meshStandardMaterial color="#b85f47" roughness={.62}/></RoundedBox>
+    <RoundedBox args={[7.75,.34,2.82]} radius={.22} smoothness={5} position={[0,.02,.95]} castShadow receiveShadow><meshStandardMaterial color="#df7d54" roughness={.42}/></RoundedBox>
+    <RoundedBox args={[7.48,.11,2.56]} radius={.13} smoothness={4} position={[0,.23,.95]} receiveShadow><meshStandardMaterial color="#b85f47" roughness={.62}/></RoundedBox>
+    <RoundedBox args={[.13,.17,2.42]} radius={.045} smoothness={3} position={[-3.66,.34,.95]} castShadow><meshStandardMaterial color="#ed936b" roughness={.44}/></RoundedBox>
+    <RoundedBox args={[.13,.17,2.42]} radius={.045} smoothness={3} position={[3.66,.34,.95]} castShadow><meshStandardMaterial color="#ed936b" roughness={.44}/></RoundedBox>
+    <RoundedBox args={[7.25,.17,.13]} radius={.045} smoothness={3} position={[0,.34,-.2]} castShadow><meshStandardMaterial color="#ed936b" roughness={.44}/></RoundedBox>
+    <RoundedBox args={[7.25,.17,.13]} radius={.045} smoothness={3} position={[0,.34,2.1]} castShadow><meshStandardMaterial color="#ed936b" roughness={.44}/></RoundedBox>
     {keyData.flatMap((row,ri)=>row.map(({k,x,z})=><Keycap key={`${ri}-${k.code}`} item={k} x={x} z={z} pressed={pressed.has(k.code)} onPress={()=>hit(k.code,k.label)}/>))}
   </group>;
 }
 
+function Mouse(){
+  const ref=useRef<THREE.Group>(null!);const [down,setDown]=useState(false);
+  useFrame((state,d)=>{ref.current.position.x=THREE.MathUtils.damp(ref.current.position.x,4.35+state.pointer.x*.16,8,d);ref.current.position.z=THREE.MathUtils.damp(ref.current.position.z,1.1-state.pointer.y*.12,8,d);ref.current.rotation.z=THREE.MathUtils.damp(ref.current.rotation.z,state.pointer.x*-.035,8,d)});
+  return <group ref={ref} position={[4.35,-1.38,1.1]} rotation={[-.08,0,-.03]} onPointerDown={(e)=>{e.stopPropagation();setDown(true)}} onPointerUp={()=>setDown(false)} onPointerLeave={()=>setDown(false)}>
+    <RoundedBox args={[1.05,.34,1.5]} radius={.28} smoothness={7} castShadow receiveShadow><meshStandardMaterial color="#ffe2c5" roughness={.4}/></RoundedBox>
+    <RoundedBox args={[.46,.08,.68]} radius={.12} smoothness={4} position={[-.25,down?.185:.22,-.33]} castShadow><meshStandardMaterial color="#f2a276" roughness={.45}/></RoundedBox>
+    <RoundedBox args={[.46,.08,.68]} radius={.12} smoothness={4} position={[.25,.22,-.33]} castShadow><meshStandardMaterial color="#f6bd91" roughness={.45}/></RoundedBox>
+    <mesh position={[0,.29,-.08]} rotation={[Math.PI/2,0,0]} castShadow><cylinderGeometry args={[.07,.07,.2,20]}/><meshStandardMaterial color="#8fc9bc" roughness={.55}/></mesh>
+    <mesh position={[0,.18,.38]}><sphereGeometry args={[.055,16,16]}/><meshStandardMaterial color="#ef936e" emissive="#ef936e" emissiveIntensity={1.2}/></mesh>
+  </group>
+}
+
 function Monitor({ typed, active }: {typed:string;active:string}) {
-  return <group position={[0,1.34,-1.35]} scale={.78}>
+  return <group position={[0,.98,-1.35]} scale={.78}>
     <RoundedBox args={[5.7,3.65,.62]} radius={.42} smoothness={8} castShadow receiveShadow><meshStandardMaterial color="#f29a67" roughness={.36}/></RoundedBox>
     <RoundedBox args={[5.08,3.08,.08]} radius={.28} smoothness={7} position={[0,.02,.35]}><meshStandardMaterial color="#7c4f46" roughness={.5}/></RoundedBox>
     <RoundedBox args={[4.64,2.68,.07]} radius={.22} smoothness={6} position={[0,.02,.41]}><meshStandardMaterial color="#241f2a" roughness={.28} emissive="#171322" emissiveIntensity={.5}/></RoundedBox>
@@ -75,7 +91,7 @@ function DeskScene({ pressed,typed,active,hit }:{pressed:Set<string>;typed:strin
   return <>
     <color attach="background" args={["#f7cfa7"]}/><fog attach="fog" args={["#f7cfa7",12,24]}/>
     <ambientLight intensity={1.6}/><directionalLight position={[-5,8,6]} intensity={3.2} color="#fff1d8" castShadow shadow-mapSize={[2048,2048]}/><pointLight position={[5,1,3]} intensity={1.4} color="#ffd08c"/>
-    <Float speed={1.1} rotationIntensity={.025} floatIntensity={.08}><group rotation={[0,.04,0]}><Monitor typed={typed} active={active}/><Keyboard pressed={pressed} hit={hit}/></group></Float>
+    <Float speed={1.1} rotationIntensity={.018} floatIntensity={.035}><group rotation={[0,.04,0]}><Monitor typed={typed} active={active}/><Keyboard pressed={pressed} hit={hit}/><Mouse/></group></Float>
     <mesh rotation={[-Math.PI/2,0,0]} position={[0,-1.72,0]} receiveShadow><planeGeometry args={[40,40]}/><meshStandardMaterial color="#efb982" roughness={.83}/></mesh>
     <ContactShadows position={[0,-1.69,0]} opacity={.38} scale={14} blur={2.4} far={5}/><Environment preset="apartment"/>
     <OrbitControls makeDefault enablePan={false} enableRotate enableZoom={false} target={[0,-.72,.62]} minAzimuthAngle={-.16} maxAzimuthAngle={.16} minPolarAngle={.88} maxPolarAngle={1.06}/>
