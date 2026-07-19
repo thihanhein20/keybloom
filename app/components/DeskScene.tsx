@@ -7,6 +7,7 @@ import {
 import { Keyboard } from "./Keyboard";
 import { Monitor } from "./Monitor";
 import { Mouse } from "./Mouse";
+import { Lamp } from "./Lamp";
 import type { Difficulty, GamePhase } from "./game-data";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
@@ -32,6 +33,7 @@ type Props = {
   accuracy: number;
   streak: number;
   darkMode: boolean;
+  onToggleTheme: () => void;
   musicPlaying: boolean;
   onMusic: () => void;
   onNextTrack: () => void;
@@ -51,6 +53,7 @@ export function DeskScene({
   start,
   reset,
   darkMode,
+  onToggleTheme,
   musicPlaying,
   onMusic,
   onNextTrack,
@@ -75,6 +78,7 @@ export function DeskScene({
           />
           <Keyboard pressed={pressed} onKey={onKey} darkMode={darkMode}/>
           <Mouse darkMode={darkMode}/>
+          <Lamp darkMode={darkMode} onToggle={onToggleTheme}/>
         </group>
       </Float>
       <mesh

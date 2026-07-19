@@ -23,7 +23,7 @@ export default function Home() {
           camera={{ position: [0, 8, 10.1], fov: 43 }}
         >
           <Suspense fallback={null}>
-            <DeskScene {...desk} darkMode={darkMode} musicPlaying={music.playing} onMusic={music.toggle} onNextTrack={music.next}/>
+            <DeskScene {...desk} darkMode={darkMode} onToggleTheme={()=>setDarkMode(value=>!value)} musicPlaying={music.playing} onMusic={music.toggle} onNextTrack={music.next}/>
           </Suspense>
         </Canvas>
       </div>
@@ -33,7 +33,7 @@ export default function Home() {
         wpm={desk.wpm}
         accuracy={desk.accuracy}
       />
-      <ExperienceControls darkMode={darkMode} musicPlaying={music.playing} trackName={music.trackName} onTheme={()=>setDarkMode(value=>!value)} onMusic={music.toggle}/>
+      <ExperienceControls musicPlaying={music.playing} trackName={music.trackName} onMusic={music.toggle}/>
     </main>
   );
 }
