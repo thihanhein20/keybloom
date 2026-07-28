@@ -23,7 +23,7 @@ export default function Home() {
           camera={{ position: [0, 8, 10.1], fov: 43 }}
         >
           <Suspense fallback={null}>
-            <DeskScene {...desk} darkMode={darkMode} musicPlaying={music.playing} onMusic={music.toggle} onNextTrack={music.next} onToggleTheme={()=>setDarkMode(value=>!value)}/>
+            <DeskScene {...desk} darkMode={darkMode} musicPlaying={music.playing} onMusic={music.toggle} onNextTrack={music.next}/>
           </Suspense>
         </Canvas>
       </div>
