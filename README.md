@@ -1,6 +1,6 @@
 # Keybloom
 
-![Keybloom's peach-and-cream 3D typing desk](public/keybloom-thumbnail-labeled.jpg)
+![Keybloom's peach-and-cream 3D typing desk](res/thumbnail.png)
 
 **Keybloom** is a small 3D typing-practice website built around one idea: typing practice should feel a little more fun than staring at a plain textbox.
 
