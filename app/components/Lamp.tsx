@@ -5,91 +5,97 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 
-type LampProps = { darkMode: boolean; onToggle: () => void };
+type LampProps = {
+  darkMode: boolean;
+  onToggle: () => void;
+};
 
 export function Lamp({ darkMode, onToggle }: LampProps) {
-  const chain = useRef<THREE.Group>(null!);
-  const glow = useRef<THREE.PointLight>(null!);
+  const pull = useRef<THREE.Group>(null!);
+  const bulb = useRef<THREE.PointLight>(null!);
   const tug = useRef(0);
 
   useFrame(({ clock }, delta) => {
-    tug.current = THREE.MathUtils.damp(tug.current, 0, 8, delta);
-    chain.current.rotation.z = Math.sin(clock.elapsedTime * 12) * tug.current * 0.18;
-    chain.current.position.y = -tug.current * 0.15;
-    glow.current.intensity = THREE.MathUtils.damp(glow.current.intensity, darkMode ? 3 : 0.2, 4, delta);
+    tug.current = THREE.MathUtils.damp(tug.current, 0, 7, delta);
+    pull.current.rotation.z = Math.sin(clock.elapsedTime * 10) * tug.current * 0.16;
+    pull.current.position.y = -tug.current * 0.12;
+    bulb.current.intensity = THREE.MathUtils.damp(
+      bulb.current.intensity,
+      darkMode ? 2.2 : 0.5,
+      3.5,
+      delta,
+    );
   });
 
-  const pullChain = (event: { stopPropagation: () => void }) => {
+  const toggle = (event: { stopPropagation: () => void }) => {
     event.stopPropagation();
     tug.current = 1;
     onToggle();
   };
 
-  const enamel = darkMode ? "#84718e" : "#ed9b77";
-  const metal = darkMode ? "#d8b4bf" : "#fff0d3";
+  const body = darkMode ? "#5f5066" : "#db8364";
+  const trim = darkMode ? "#a48aab" : "#f5bd96";
 
   return (
-    <group position={[3.6, -1.71, -1.05]} rotation={[0, -0.18, 0]}>
-      {/* Classic, recognisable lamp base */}
-      <mesh position={[0, 0.12, 0]} castShadow receiveShadow>
-        <cylinderGeometry args={[0.72, 0.82, 0.24, 40]} />
-        <meshStandardMaterial color={metal} roughness={0.35} />
+    <group position={[3.55, -1.7, -1.78]} rotation={[0, -0.18, 0]}>
+      {/* low, weighted base keeps the lamp grounded on the desk */}
+      <mesh castShadow receiveShadow position={[0, 0.13, 0]}>
+        <cylinderGeometry args={[0.7, 0.78, 0.25, 40]} />
+        <meshStandardMaterial color={trim} roughness={0.42} />
       </mesh>
-      <mesh position={[0, 0.29, 0]} castShadow>
-        <sphereGeometry args={[0.48, 32, 24]} />
-        <meshStandardMaterial color={enamel} roughness={0.35} />
+      <mesh castShadow position={[0, 0.3, 0]}>
+        <sphereGeometry args={[0.52, 32, 24]} />
+        <meshStandardMaterial color={body} roughness={0.4} />
       </mesh>
-      <mesh position={[0, 1.05, 0]} castShadow>
-        <cylinderGeometry args={[0.11, 0.15, 1.38, 24]} />
-        <meshStandardMaterial color={enamel} roughness={0.34} />
-      </mesh>
-      <mesh position={[0, 1.76, 0]} castShadow>
-        <sphereGeometry args={[0.19, 24, 18]} />
-        <meshStandardMaterial color={metal} roughness={0.28} />
+      <mesh castShadow position={[0, 0.78, 0]}>
+        <sphereGeometry args={[0.18, 24, 18]} />
+        <meshStandardMaterial color={trim} roughness={0.38} />
       </mesh>
 
-      {/* Short arm and a deliberately oversized, downward-facing lampshade */}
-      <mesh position={[0.28, 1.98, 0.03]} rotation={[0, 0, -0.72]} castShadow>
-        <cylinderGeometry args={[0.1, 0.12, 0.66, 24]} />
-        <meshStandardMaterial color={enamel} roughness={0.34} />
+      {/* a softly bent retro arm */}
+      <mesh castShadow position={[-0.24, 1.22, 0]} rotation={[0, 0, 0.5]}>
+        <cylinderGeometry args={[0.12, 0.14, 0.9, 24]} />
+        <meshStandardMaterial color={body} roughness={0.38} />
       </mesh>
-      <mesh position={[0.53, 2.14, 0.05]} castShadow>
-        <sphereGeometry args={[0.14, 24, 18]} />
-        <meshStandardMaterial color={metal} roughness={0.28} />
+      <mesh castShadow position={[-0.5, 1.59, 0]}>
+        <sphereGeometry args={[0.16, 24, 18]} />
+        <meshStandardMaterial color={trim} roughness={0.38} />
       </mesh>
-      <group position={[0.58, 2.0, 0.06]}>
+      <mesh castShadow position={[-0.72, 1.75, 0.03]} rotation={[0, 0, -0.68]}>
+        <cylinderGeometry args={[0.12, 0.14, 0.62, 24]} />
+        <meshStandardMaterial color={body} roughness={0.38} />
+      </mesh>
+
+      {/* angled shade, open on the bottom with a warm diffuser */}
+      <group position={[-0.92, 1.96, 0.05]} rotation={[0.08, 0, -0.68]}>
         <mesh castShadow>
-          <coneGeometry args={[0.64, 0.68, 40]} />
-          <meshStandardMaterial color={enamel} roughness={0.28} />
+          <coneGeometry args={[0.47, 0.55, 32, 1, true]} />
+          <meshStandardMaterial color={trim} side={THREE.DoubleSide} roughness={0.35} />
         </mesh>
-        <mesh position={[0, -0.35, 0]}>
-          <cylinderGeometry args={[0.5, 0.5, 0.055, 40]} />
-          <meshStandardMaterial color="#fff4bb" emissive="#ffc15c" emissiveIntensity={darkMode ? 3.2 : 0.5} />
+        <mesh position={[0, -0.28, 0]}>
+          <cylinderGeometry args={[0.35, 0.35, 0.035, 32]} />
+          <meshStandardMaterial color="#fff1b2" emissive="#ffcf72" emissiveIntensity={darkMode ? 2.2 : 0.65} />
         </mesh>
-        <mesh position={[0, -0.35, 0]}>
-          <torusGeometry args={[0.53, 0.045, 12, 40]} />
-          <meshStandardMaterial color={metal} roughness={0.22} />
-        </mesh>
-        <mesh position={[0, -0.41, 0]}>
-          <sphereGeometry args={[0.15, 24, 18]} />
-          <meshStandardMaterial color="#fff4bd" emissive="#ffbe54" emissiveIntensity={darkMode ? 3.8 : 0.7} />
+        <mesh position={[0, -0.28, 0]}>
+          <torusGeometry args={[0.38, 0.038, 12, 32]} />
+          <meshStandardMaterial color="#fff4de" roughness={0.28} />
         </mesh>
       </group>
-      <pointLight ref={glow} position={[0.58, 1.58, 0.35]} color="#ffd17a" intensity={darkMode ? 3 : 0.2} distance={6.5} decay={2} />
+      <pointLight ref={bulb} position={[-0.95, 1.7, 0.35]} color="#ffd789" intensity={darkMode ? 2.2 : 0.5} distance={5.3} decay={2} />
 
-      {/* A long, visible pull chain: grab the coral bead to switch the room */}
-      <group ref={chain} position={[0.58, 1.7, 0.3]}>
-        <mesh position={[0, -0.55, 0]}>
-          <cylinderGeometry args={[0.02, 0.02, 1.1, 12]} />
-          <meshStandardMaterial color={darkMode ? "#f7c5d1" : "#774b46"} roughness={0.65} />
+      {/* pull string: the small coral bead is the theme switch */}
+      <group ref={pull} position={[-1.25, 1.48, 0.16]}>
+        <mesh position={[0, -0.48, 0]}>
+          <cylinderGeometry args={[0.017, 0.017, 0.96, 10]} />
+          <meshStandardMaterial color={darkMode ? "#f5bfd0" : "#8d564d"} roughness={0.78} />
         </mesh>
-        <mesh position={[0, -1.18, 0]} castShadow onPointerDown={pullChain}>
-          <sphereGeometry args={[0.17, 28, 20]} />
-          <meshStandardMaterial color={darkMode ? "#ff9dbe" : "#e76c58"} emissive={darkMode ? "#ff477d" : "#000000"} emissiveIntensity={darkMode ? 1.2 : 0} roughness={0.3} />
+        <mesh position={[0, -1.02, 0]} castShadow onPointerDown={toggle}>
+          <sphereGeometry args={[0.14, 24, 18]} />
+          <meshStandardMaterial color={darkMode ? "#ff9cc0" : "#ea755d"} emissive={darkMode ? "#ff4d88" : "#000000"} emissiveIntensity={darkMode ? 0.9 : 0} roughness={0.36} />
         </mesh>
       </group>
-      <RoundedBox args={[0.25, 0.05, 0.14]} radius={0.025} smoothness={3} position={[0.37, 0.13, 0.65]}>
-        <meshStandardMaterial color={darkMode ? "#8fc9bc" : "#fff5e1"} emissive={darkMode ? "#69c0ac" : "#000000"} emissiveIntensity={darkMode ? 0.9 : 0} />
+      <RoundedBox args={[0.28, 0.06, 0.15]} radius={0.03} smoothness={3} position={[0.22, 0.12, 0.63]}>
+        <meshStandardMaterial color={darkMode ? "#8fc9bc" : "#fff0d9"} emissive={darkMode ? "#70c9ba" : "#000000"} emissiveIntensity={darkMode ? 0.75 : 0} />
       </RoundedBox>
     </group>
   );
