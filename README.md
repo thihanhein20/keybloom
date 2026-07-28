@@ -1,98 +1,64 @@
-# vinext-starter
+# Keybloom
 
-A clean full-stack starter running on
-[vinext](https://github.com/cloudflare/vinext), with optional Cloudflare D1 and
-Drizzle support.
+![Keybloom's peach-and-cream 3D typing desk](public/keybloom-thumbnail-labeled.jpg)
 
-## Prerequisites
+**Keybloom** is a small 3D typing-practice website built around one idea: typing practice should feel a little more fun than staring at a plain textbox.
 
-- Node.js `>=22.13.0`
+You sit down at a warm retro desk, pick a level and a timer on the monitor, then type. The keyboard reacts to your real keypresses, the monitor keeps up with your progress, and the whole thing is meant to feel like a tiny interactive desk setup rather than a normal typing test.
 
-## Quick Start
+## What you can do
+
+- Pick easy, medium, or hard passages
+- Choose a practice time from one to five minutes
+- See your WPM, accuracy, streak, and progress while you type
+- Press real keys and watch their matching 3D keycaps move
+- Switch between a calm day scene and a darker mechanical-keyboard mode
+- Play or pause the desk music and use the retro monitor controls
+- Click the mouse for a small physical click animation and sound
+
+## Why I made it
+
+Typing sites are useful, but they can feel a bit like homework. I wanted to make one that feels more like hanging out at a desk you actually want to use: warm colors, chunky keys, a friendly little monitor, and satisfying click-clack feedback.
+
+The project is also my way of learning how much personality a website can have when the interface is part of a 3D scene instead of sitting on top of one.
+
+## Built with
+
+- [Next.js](https://nextjs.org/)
+- [React](https://react.dev/)
+- TypeScript
+- [Three.js](https://threejs.org/)
+- [React Three Fiber](https://docs.pmnd.rs/react-three-fiber)
+- [React Three Drei](https://github.com/pmndrs/drei)
+- WebGL, CSS, and the Web Audio API
+
+The monitor, keyboard case, keycaps, mouse, lights, and desk are made from code. I did not use a downloaded 3D desk model; the fun part was building the little pieces myself from simple shapes.
+
+## Running it locally
+
+You will need Node.js 22.13 or newer.
 
 ```bash
 npm install
 npm run dev
+```
+
+Then open the local address shown in the terminal. For a production build, run:
+
+```bash
 npm run build
 ```
 
-This starter does not use `wrangler.jsonc`.
+## A few tricky parts
 
-## Included Shape
+The hardest part was making the desk look like one scene instead of a collection of floating objects. Camera angle, shadows, keyboard spacing, monitor height, and lighting all had to work together.
 
-- edit site code under `app/`
-- `.openai/hosting.json` declares optional Sites D1 and R2 bindings
-- `vite.config.ts` simulates declared bindings for local development
-- `db/schema.ts` starts intentionally empty
-- `examples/d1/` contains an optional D1 example surface
-- `drizzle.config.ts` supports local migration generation when needed
+Keeping the typing game and the 3D keyboard in sync was another challenge. One keypress needs to update the passage, timer, accuracy, WPM, screen, and physical key animation at the same time. It took a lot of small adjustments, but that is what makes the keyboard feel alive.
 
-## Workspace Auth Headers
+## What's next
 
-OpenAI workspace sites can read the current user's email from
-`oai-authenticated-user-email`.
+I would like to add saved personal bests, more passage themes, custom desk skins, and a few different typing modes. A friendly multiplayer race mode would be fun too.
 
-SIWC-authenticated workspace sites may also receive
-`oai-authenticated-user-full-name` when the user's SIWC profile has a non-empty
-`name` claim. The full-name value is percent-encoded UTF-8 and is accompanied by
-`oai-authenticated-user-full-name-encoding: percent-encoded-utf-8`.
+---
 
-Treat the full name as optional and fall back to email when it is absent:
-
-```tsx
-import { headers } from "next/headers";
-
-export default async function Home() {
-  const requestHeaders = await headers();
-  const email = requestHeaders.get("oai-authenticated-user-email");
-  const encodedFullName = requestHeaders.get("oai-authenticated-user-full-name");
-  const fullName =
-    encodedFullName &&
-    requestHeaders.get("oai-authenticated-user-full-name-encoding") ===
-      "percent-encoded-utf-8"
-      ? decodeURIComponent(encodedFullName)
-      : null;
-
-  const displayName = fullName ?? email;
-  // ...
-}
-```
-
-## Optional Dispatch-Owned ChatGPT Sign-In
-
-Import the ready-to-use helpers from `app/chatgpt-auth.ts` when the site needs
-optional or required ChatGPT sign-in:
-
-- Use `getChatGPTUser()` for optional signed-in UI.
-- Use `requireChatGPTUser(returnTo)` for server-rendered pages that should send
-  anonymous visitors through Sign in with ChatGPT.
-- Use `chatGPTSignInPath(returnTo)` and `chatGPTSignOutPath(returnTo)` for
-  browser links or actions.
-- Pass a same-origin relative `returnTo` path for the destination after sign-in
-  or sign-out. The helper validates and safely encodes it.
-- Mark protected pages with `export const dynamic = "force-dynamic"` because
-  they depend on per-request identity headers.
-
-Dispatch owns `/signin-with-chatgpt`, `/signout-with-chatgpt`, `/callback`, the
-OAuth cookies, and identity header injection. Do not implement app routes for
-those reserved paths. Routes that do not import and call the helper remain
-anonymous-compatible.
-
-SIWC establishes identity only; it does not prove workspace membership. Use the
-Sites hosting platform's access policy controls for workspace-wide restrictions,
-or enforce explicit server-side membership or allowlist checks.
-
-Use SIWC for account pages, user-specific dashboards, saved records, and write
-actions tied to the current ChatGPT user. Leave public content anonymous.
-
-## Useful Commands
-
-- `npm run dev`: start local development
-- `npm run build`: verify the vinext build output
-- `npm test`: build the starter and verify its rendered loading skeleton
-- `npm run db:generate`: generate Drizzle migrations after schema changes
-
-## Learn More
-
-- [vinext Documentation](https://github.com/cloudflare/vinext)
-- [Drizzle D1 Guide](https://orm.drizzle.team/docs/get-started/d1-new)
+Built for the 3D Websites Hackathon.
